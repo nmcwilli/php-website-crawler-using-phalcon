@@ -1,0 +1,535 @@
+<div class="page-header">
+    <h1>PHP website crawler using Phalcon Framework</h1>
+    <p>By <b>Neil McWilliam</b></p>
+</div>
+
+<hr>
+
+<?php 
+// Get page title
+function getTitle($url)
+{
+    $str = file_get_contents($url);
+    if(strlen($str)>0){
+        $str = trim(preg_replace('/\s+/', ' ', $str)); // supports line breaks inside <title>
+        preg_match("/\<title\>(.*)\<\/title\>/i",$str,$title); // ignore case
+        return $title[1];
+    }
+}
+
+// Get http response code
+function getResponseCode($url) {
+    $headers = get_headers($url);
+    return substr($headers[0], 9, 3);
+}
+/* Initial version of function
+function getHttpCode($http_response_header)
+{
+    if(is_array($http_response_header))
+    {
+        $parts=explode(' ',$http_response_header[0]);
+        if(count($parts)>1) //HTTP/1.0 <code> <text>
+            return intval($parts[1]); //Get code
+    }
+    return 0;
+} */
+
+// Array Needle Function
+function substrCountArray( $haystack, $needle ) {
+     $count = 0;
+     foreach ($needle as $substring) {
+          $count += substr_count( $haystack, $substring);
+     }
+     return $count;
+}
+
+// Get unique links on a page related to internal domains 
+function countUniqueInternalLinks( $pageContent ) {
+
+// Grab live page html content
+$myhtml = <<<EOF
+$pageContent
+EOF;
+
+    // Create a new DOM Document to hold page structure
+    $doc = new DOMDocument();
+    $doc->loadHTML($myhtml);
+
+    $tags = $doc->getElementsByTagName('a');
+
+    // Create an empty array to hold the results
+    $array = array(); 
+
+    // Store each value in an array
+    foreach ($tags as $tag) { 
+
+        // Add it to the array if it's an internal link 
+        if (
+            $tag->getAttribute('href') == "/" || 
+            substr($tag->getAttribute('href'), 0, 1) == "/" || 
+            substr($tag->getAttribute('href'), 0, 23) == "https://agencyanalytics" || 
+            substr($tag->getAttribute('href'), 0, 27) == "https://www.agencyanalytics" || 
+            substr($tag->getAttribute('href'), 0, 26) == "http://www.agencyanalytics" || 
+            substr($tag->getAttribute('href'), 0, 22) == "http://agencyanalytics" 
+        ){
+            $array[] = $tag->getAttribute('href'); 
+
+        // don't add it to the array 
+        } else {
+            // nothing to see here
+        }
+    } 
+
+    // print_r(array_unique($array)); (to print the array for reference -- commented out)
+
+    // count unique elements in the array 
+    $uniq = count(array_unique($array));
+    return $uniq;
+}
+
+// Get unique links on a page NOT related to internal domains
+function countUniqueExternalLinks( $pageContent ) {
+
+// Grab live page html content
+$myhtml = <<<EOF
+$pageContent
+EOF;
+
+    // Create a new DOM Document to hold page structure
+    $doc = new DOMDocument();
+    $doc->loadHTML($myhtml);
+
+    $tags = $doc->getElementsByTagName('a');
+
+    // Create an empty array to hold the results
+    $array = array(); 
+
+    // Store each value in an array
+    foreach ($tags as $tag) { 
+
+        // Add it to the array if it's an internal link 
+        if (
+            $tag->getAttribute('href') != "/" && 
+            substr($tag->getAttribute('href'), 0, 1) != "/" && 
+            substr($tag->getAttribute('href'), 0, 23) != "https://agencyanalytics" && 
+            substr($tag->getAttribute('href'), 0, 27) != "https://www.agencyanalytics" && 
+            substr($tag->getAttribute('href'), 0, 26) != "http://www.agencyanalytics" && 
+            substr($tag->getAttribute('href'), 0, 22) != "http://agencyanalytics" 
+        ){
+            $array[] = $tag->getAttribute('href'); 
+
+        // don't add it to the array 
+        } else {
+            // nothing to see here
+        }
+    } 
+
+    // print_r(array_unique($array)); (to print the array for reference -- commented out)
+
+    // count unique elements in the array 
+    $uniq = count(array_unique($array));
+    return $uniq;
+}
+
+// Get unique images on a page
+function countUniqueImages( $pageContent ) {
+
+// Grab live page html content
+$myhtml = <<<EOF
+$pageContent
+EOF;
+
+    // Create a new DOM Document to hold page structure
+    $doc = new DOMDocument();
+    $doc->loadHTML($myhtml);
+
+    $tags = $doc->getElementsByTagName('img');
+
+    // Create an empty array to hold the results
+    $array = array(); 
+
+    // Store each value in an array
+    foreach ($tags as $tag) { 
+        $array[] = $tag->getAttribute('src'); 
+    } 
+
+    // print_r(array_unique($array)); (to print the array for reference -- commented out)
+
+    // count unique elements in the array 
+    $uniq = count(array_unique($array));
+    return $uniq;
+}
+
+/* Get page word count
+function pageWordCount( $pageContent ) {
+
+// Grab live page html content
+$myhtml = <<<EOF
+$pageContent
+EOF;
+
+    // Create a new DOM Document to hold page structure
+    $doc = new DOMDocument();
+
+    // load html content
+    $doc->loadHTML($myhtml);
+
+    // Calculate word count of the page (excluding )
+    print_r(str_word_count(strip_tags(strtolower($doc)), 1));
+} */
+
+// Specify number of urls you want to crawl 
+$totalUrls = 5;
+
+// Specify the actual urls to crawl
+$pageUrl1 = 'https://agencyanalytics.com/feature/seo-tools'; // seo tools page
+$pageUrl2 = 'https://agencyanalytics.com/pricing'; // pricing page
+$pageUrl3 = 'https://agencyanalytics.com/feature/automated-marketing-reports'; // automated marketing reports
+$pageUrl4 = 'https://agencyanalytics.com/feature/white-label'; // white label
+$pageUrl5 = 'https://agencyanalytics.com/feature/linkedin-dashboard'; // linkedin dashboard
+
+// Use file_get_contents to store the page contents in variables
+$pageContent1 = file_get_contents($pageUrl1); 
+$pageContent2 = file_get_contents($pageUrl2); 
+$pageContent3 = file_get_contents($pageUrl3); 
+$pageContent4 = file_get_contents($pageUrl4); 
+$pageContent5 = file_get_contents($pageUrl5); 
+
+// Calculate total images
+$totalImages = substr_count($pageContent1, '<img') + substr_count($pageContent2, '<img') + substr_count($pageContent3, '<img') + substr_count($pageContent4, '<img') + substr_count($pageContent5, '<img'); 
+
+// Store title lengths
+$titleLength1 = strlen(getTitle($pageUrl1));
+$titleLength2 = strlen(getTitle($pageUrl2));
+$titleLength3 = strlen(getTitle($pageUrl3));
+$titleLength4 = strlen(getTitle($pageUrl4));
+$titleLength5 = strlen(getTitle($pageUrl5));
+
+// Calculate average title length
+$averageLength = ($titleLength1 + $titleLength2 + $titleLength3 + $titleLength4 + $titleLength5) / 5;
+
+// Add up instances of internal links
+$numberOfInternal1 = substr_count($pageContent1, '<a href="https://agencyanalytics') + substr_count($pageContent1, '<a href="https://www.agencyanalytics') + substr_count($pageContent1, '<a href="http://agencyanalytics') + substr_count($pageContent1, '<a href="http://www.agencyanalytics') + substr_count($pageContent1, '<a href="/'); 
+$numberOfInternal2 = substr_count($pageContent2, '<a href="https://agencyanalytics') + substr_count($pageContent2, '<a href="https://www.agencyanalytics') + substr_count($pageContent2, '<a href="http://agencyanalytics') + substr_count($pageContent2, '<a href="http://www.agencyanalytics') + substr_count($pageContent2, '<a href="/'); 
+$numberOfInternal3 = substr_count($pageContent3, '<a href="https://agencyanalytics') + substr_count($pageContent3, '<a href="https://www.agencyanalytics') + substr_count($pageContent3, '<a href="http://agencyanalytics') + substr_count($pageContent3, '<a href="http://www.agencyanalytics') + substr_count($pageContent3, '<a href="/'); 
+$numberOfInternal4 = substr_count($pageContent4, '<a href="https://agencyanalytics') + substr_count($pageContent4, '<a href="https://www.agencyanalytics') + substr_count($pageContent4, '<a href="http://agencyanalytics') + substr_count($pageContent4, '<a href="http://www.agencyanalytics') + substr_count($pageContent4, '<a href="/'); 
+$numberOfInternal5 = substr_count($pageContent5, '<a href="https://agencyanalytics') + substr_count($pageContent5, '<a href="https://www.agencyanalytics') + substr_count($pageContent5, '<a href="http://agencyanalytics') + substr_count($pageContent5, '<a href="http://www.agencyanalytics') + substr_count($pageContent5, '<a href="/'); 
+$totalInternalUrls = $numberOfInternal1 + $numberOfInternal2 + $numberOfInternal3 + $numberOfInternal4 + $numberOfInternal5;
+
+// Caclulate average page load times
+// ----------------------------------
+
+// Create an empty array to hold the results
+$arrayLoadTimes = array(); 
+
+// Page 1 
+
+// Create a new DOM Document to hold page structure
+$doc1 = new DOMDocument();
+
+// Grab the current time
+$start_time1 = microtime(TRUE); 
+
+// Specify the html content
+$myhtml1 = <<<EOF
+$pageContent1
+EOF;
+
+// load the html
+$doc1->loadHTML($myhtml1);
+
+// Calculate the end time
+$end_time1 = microtime(TRUE);
+
+// Calculate the time taken
+$time_taken1 =($end_time1 - $start_time1)*1000;
+$time_taken1 = round($time_taken1,5);
+
+// Add the load time to the array 
+$arrayLoadTimes[] = $time_taken1; 
+
+// Page 2 
+
+// Create a new DOM Document to hold page structure
+$doc2 = new DOMDocument();
+
+// Grab the current time
+$start_time2 = microtime(TRUE); 
+
+// Specify the html content
+$myhtml2 = <<<EOF
+$pageContent2
+EOF;
+
+// Load the html
+$doc2->loadHTML($myhtml2);
+
+// Calculate the end time
+$end_time2 = microtime(TRUE); 
+
+// Calculate the time taken
+$time_taken2 =($end_time2 - $start_time2)*1000;
+$time_taken2 = round($time_taken2,5);
+
+// Add the load time to the array 
+$arrayLoadTimes[] = $time_taken2; 
+
+// Page 3 
+
+// Create a new DOM Document to hold page structure
+$doc3 = new DOMDocument();
+
+// Grab the current time
+$start_time3 = microtime(TRUE); 
+
+// Load the 3rd page html content
+$myhtml3 = <<<EOF
+$pageContent3
+EOF;
+
+// Load the html content
+$doc3->loadHTML($myhtml3);
+
+// Calculate the end time
+$end_time3 = microtime(TRUE); 
+
+// Calculate the time taken
+$time_taken3 =($end_time3 - $start_time3)*1000;
+$time_taken3 = round($time_taken3,5);
+
+// Add the load time to the array 
+$arrayLoadTimes[] = $time_taken3; 
+
+// Page 4 
+
+// Create a new DOM Document to hold page structure
+$doc4 = new DOMDocument();
+
+// Grab the current time
+$start_time4 = microtime(TRUE); 
+
+// Load the 4th page html content
+$myhtml4 = <<<EOF
+$pageContent4
+EOF;
+
+// Load the html
+$doc4->loadHTML($myhtml4);
+
+// Calculate the end time
+$end_time4 = microtime(TRUE); 
+
+// Calculate the time taken
+$time_taken4 =($end_time4 - $start_time4)*1000;
+$time_taken4 = round($time_taken4,5);
+
+// Add the load time to the array 
+$arrayLoadTimes[] = $time_taken4; 
+
+// Page 5 
+
+// Create a new DOM Document to hold page structure
+$doc5 = new DOMDocument();
+
+// Grab the current time
+$start_time5 = microtime(TRUE); 
+
+// Load the 5th page html content
+$myhtml5 = <<<EOF
+$pageContent5
+EOF;
+
+// Load the html
+$doc5->loadHTML($myhtml5);
+
+// Calculate the end time
+$end_time5 = microtime(TRUE); 
+
+// Calculate the time taken
+$time_taken5 =($end_time5 - $start_time5)*1000;
+$time_taken5 = round($time_taken5,5);
+
+// Add the load time to the array 
+$arrayLoadTimes[] = $time_taken5; 
+
+// Calculate the load time average, excluding empties 
+$a = array_filter($arrayLoadTimes);
+$average = array_sum($a)/count($a);
+?>
+
+<h2>Number of pages crawled</h2>
+<p><?php echo $totalUrls; ?></p>
+
+<h2>Number of unique images</h2>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+    <tr>
+        <th>Page Title</th>
+        <th>URL Analyzed</th>
+        <th># of unique images</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?php echo getTitle($pageUrl1); ?></td>
+            <td><?php echo $pageUrl1; ?></td>
+            <td><?php echo countUniqueImages($pageContent1); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl2); ?></td>
+            <td><?php echo $pageUrl2; ?></td>
+            <td><?php echo countUniqueImages($pageContent2); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl3); ?></td>
+            <td><?php echo $pageUrl3; ?></td>
+            <td><?php echo countUniqueImages($pageContent3); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl4); ?></td>
+            <td><?php echo $pageUrl4; ?></td>
+            <td><?php echo countUniqueImages($pageContent4); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl5); ?></td>
+            <td><?php echo $pageUrl5; ?></td>
+            <td><?php echo countUniqueImages($pageContent5); ?></td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
+<h2>Number of unique internal links</h2>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+    <tr>
+        <th>Page Title</th>
+        <th>URL Analyzed</th>
+        <th># of unique internal links</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?php echo getTitle($pageUrl1); ?></td>
+            <td><?php echo $pageUrl1; ?></td>
+            <td><?php echo countUniqueInternalLinks($pageContent1); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl2); ?></td>
+            <td><?php echo $pageUrl2; ?></td>
+            <td><?php echo countUniqueInternalLinks($pageContent2); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl3); ?></td>
+            <td><?php echo $pageUrl3; ?></td>
+            <td><?php echo countUniqueInternalLinks($pageContent3); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl4); ?></td>
+            <td><?php echo $pageUrl4; ?></td>
+            <td><?php echo countUniqueInternalLinks($pageContent4); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl5); ?></td>
+            <td><?php echo $pageUrl5; ?></td>
+            <td><?php echo countUniqueInternalLinks($pageContent5); ?></td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
+<h2>Number of unique external links</h2>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+    <tr>
+        <th>Page Title</th>
+        <th>URL Analyzed</th>
+        <th># of unique external links</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?php echo getTitle($pageUrl1); ?></td>
+            <td><?php echo $pageUrl1; ?></td>
+            <td><?php echo countUniqueExternalLinks($pageContent1); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl2); ?></td>
+            <td><?php echo $pageUrl2; ?></td>
+            <td><?php echo countUniqueExternalLinks($pageContent2); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl3); ?></td>
+            <td><?php echo $pageUrl3; ?></td>
+            <td><?php echo countUniqueExternalLinks($pageContent3); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl4); ?></td>
+            <td><?php echo $pageUrl4; ?></td>
+            <td><?php echo countUniqueExternalLinks($pageContent4); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl5); ?></td>
+            <td><?php echo $pageUrl5; ?></td>
+            <td><?php echo countUniqueExternalLinks($pageContent5); ?></td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
+<h2>Average page load</h2>
+<p><b><?php echo round($average, 2); ?> seconds</b> is the average page load time</p>
+<p><?php print_r($arrayLoadTimes); ?></p>
+
+<br>
+
+<h2>Average word count</h2>
+<p>Coming soon!</p>
+
+<br>
+
+<h2>Average title length</h2>
+<p><b><?php echo $averageLength; ?></b> characters (including spaces)</p>
+
+<br>
+
+<h2>Page crawled status codes</h2>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+    <tr>
+        <th>Page Title</th>
+        <th>URL Analyzed</th>
+        <th>HTTP Response Code</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?php echo getTitle($pageUrl1); ?></td>
+            <td><?php echo $pageUrl1; ?></td>
+            <td><b><?php echo getResponseCode($pageUrl1); ?></b></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl2); ?></td>
+            <td><?php echo $pageUrl2; ?></td>
+            <td><b><?php echo getResponseCode($pageUrl2); ?></b></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl3); ?></td>
+            <td><?php echo $pageUrl3; ?></td>
+            <td><b><?php echo getResponseCode($pageUrl3); ?></b></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl4); ?></td>
+            <td><?php echo $pageUrl4; ?></td>
+            <td><b><?php echo getResponseCode($pageUrl4); ?></b></td>
+        </tr>
+        <tr>
+            <td><?php echo getTitle($pageUrl5); ?></td>
+            <td><?php echo $pageUrl5; ?></td>
+            <td><b><?php echo getResponseCode($pageUrl5); ?></b></td>
+        </tr>
+    </tbody>
+</table>
