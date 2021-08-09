@@ -172,12 +172,55 @@ $averageLength = ($titleLength1 + $titleLength2 + $titleLength3 + $titleLength4 
 <br>
 
 <h2>Word counts</h2>
-<p>Coming soon!</p>
-<!-- <p>Page 1: <?php // echo $wordCount->getWordCount($pageContent1); ?></p>
-<p>Page 2: <?php // echo $wordCount->getWordCount($pageContent2); ?></p>
-<p>Page 3: <?php // echo $wordCount->getWordCount($pageContent3); ?></p>
-<p>Page 4: <?php // echo $wordCount->getWordCount($pageContent4); ?></p>
-<p>Page 5: <?php // echo $wordCount->getWordCount($pageContent5); ?></p> -->
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+    <tr>
+        <th>Page Title</th>
+        <th>URL Analyzed</th>
+        <th># of words</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+            <td><?php echo $pageUrl1; ?></td>
+            <td><?php echo $wordCount->getWordCount($pageContent1); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+            <td><?php echo $pageUrl2; ?></td>
+            <td><?php echo $wordCount->getWordCount($pageContent2); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+            <td><?php echo $pageUrl3; ?></td>
+            <td><?php echo $wordCount->getWordCount($pageContent3); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+            <td><?php echo $pageUrl4; ?></td>
+            <td><?php echo $wordCount->getWordCount($pageContent4); ?></td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+            <td><?php echo $pageUrl5; ?></td>
+            <td><?php echo $wordCount->getWordCount($pageContent5); ?></td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td>
+                <?php 
+                // Calculate the average 
+                $wordCountAvg = array($wordCount->getWordCount($pageContent1), $wordCount->getWordCount($pageContent2), $wordCount->getWordCount($pageContent3), $wordCount->getWordCount($pageContent4), $wordCount->getWordCount($pageContent5)); 
+                $ab = array_filter($wordCountAvg);
+                $averagePerPg = array_sum($ab)/count($ab);
+                echo "The average number of words per page is <b>".$averagePerPg."</b>.";
+                ?>
+            </td>
+        </tr>
+    </tfoot>
+</table>
 
 <br>
 

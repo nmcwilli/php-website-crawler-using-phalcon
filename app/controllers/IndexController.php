@@ -148,15 +148,18 @@ EOF;
 EOF;
 
         // Create a new DOM Document to hold page structure
-        $doc = new DOMDocument();
+        $doc = new DOMDocument(); 
 
         // load html content
-        $doc->loadHTML($myhtml);
+        $doc->loadHTML($myhtml); 
 
-        $rendered=$doc->saveHTML();
+        $htm=$doc->saveHTML(); 
+
+        $htm=strip_tags($htm); 
+        $htm=str_word_count($htm); 
 
         // Calculate word count of the page (excluding tags)
-        print_r(str_word_count(strip_tags(strtolower($rendered)), 1));
+        return $htm; 
     }
 
     // Calculate average page load times
