@@ -7,5 +7,4 @@ class ControllerBase extends Controller
 {
     // Implement common logic
 
-    
 }
