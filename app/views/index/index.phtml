@@ -12,8 +12,10 @@ $responseCode = new IndexController;
 $internalLinks = new IndexController;
 $externalLinks = new IndexController; 
 $pageLoadTime = new IndexController; 
+$singlePageLoadTime = new IndexController; 
 $uniqueImages = new IndexController; 
 $wordCount = new IndexController; 
+$fileGetContents = new IndexController; 
 
 // Specify number of urls you want to crawl 
 $totalUrls = 5;
@@ -26,11 +28,11 @@ $pageUrl4 = 'https://agencyanalytics.com/feature/white-label'; // white label
 $pageUrl5 = 'https://agencyanalytics.com/feature/linkedin-dashboard'; // linkedin dashboard
 
 // Use file_get_contents to store the page contents in variables
-$pageContent1 = file_get_contents($pageUrl1); 
-$pageContent2 = file_get_contents($pageUrl2); 
-$pageContent3 = file_get_contents($pageUrl3); 
-$pageContent4 = file_get_contents($pageUrl4); 
-$pageContent5 = file_get_contents($pageUrl5); 
+$pageContent1 = $fileGetContents->fileGetContents($pageUrl1); 
+$pageContent2 = $fileGetContents->fileGetContents($pageUrl2); 
+$pageContent3 = $fileGetContents->fileGetContents($pageUrl3); 
+$pageContent4 = $fileGetContents->fileGetContents($pageUrl4); 
+$pageContent5 = $fileGetContents->fileGetContents($pageUrl5); 
 
 // Store title lengths
 $titleLength1 = strlen($pageTitle->getTitle($pageUrl1));
@@ -167,7 +169,55 @@ $averageLength = ($titleLength1 + $titleLength2 + $titleLength3 + $titleLength4 
 <br>
 
 <h2>Average page load</h2>
-<p><b><?php echo $pageLoadTime->averagePageLoadTime(); ?> seconds</b> is the average page load time</p>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
+    <tr>
+        <th>Page Title</th>
+        <th>URL Analyzed</th>
+        <th>Load time</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+            <td><?php echo $pageUrl1; ?></td>
+            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent1); ?> seconds</td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+            <td><?php echo $pageUrl2; ?></td>
+            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent2); ?> seconds</td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+            <td><?php echo $pageUrl3; ?></td>
+            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent3); ?> seconds</td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+            <td><?php echo $pageUrl4; ?></td>
+            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent4); ?> seconds</td>
+        </tr>
+        <tr>
+            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+            <td><?php echo $pageUrl5; ?></td>
+            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent5); ?> seconds</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td>
+                <?php 
+                // Calculate the average 
+                $pageLoadAvg = array($singlePageLoadTime->singlePageLoadTime($pageContent1), $singlePageLoadTime->singlePageLoadTime($pageContent2), $singlePageLoadTime->singlePageLoadTime($pageContent3), $singlePageLoadTime->singlePageLoadTime($pageContent4), $singlePageLoadTime->singlePageLoadTime($pageContent5)); 
+                $pg = array_filter($pageLoadAvg);
+                $averagePgLoad = array_sum($pg)/count($pg);
+                echo "The average page load value is <b>".$averagePgLoad." seconds</b>.";
+                ?>
+            </td>
+        </tr>
+    </tfoot>
+</table>
 
 <br>
 

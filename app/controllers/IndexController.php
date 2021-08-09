@@ -22,7 +22,14 @@ class IndexController extends ControllerBase
     // indexAction
     public function indexAction()
     {
-        
+        // nothing to see here
+    }
+
+    // file_get_contents function
+    public function fileGetContents($url) 
+    {
+        $pageContent = file_get_contents($url);
+        return $pageContent;
     }
 
     // Get Page Title
@@ -42,14 +49,16 @@ class IndexController extends ControllerBase
         return substr($headers[0], 9, 3);
     }
 
-    // Array Needle Function (---Unused---)
+    // Array Needle Function
+    // UNUSED BUT KEPT HERE FOR REFERENCE
+    /* 
     public function substrCountArray( $haystack, $needle ) {
          $count = 0;
          foreach ($needle as $substring) {
               $count += substr_count( $haystack, $substring);
          }
          return $count;
-    }
+    } */
 
     // Get Internal Domain Unique Links
     public function countUniqueInternalLinks( $pageContent ) {
@@ -162,7 +171,37 @@ EOF;
         return $htm; 
     }
 
-    // Calculate average page load times
+    // Calculate single page load time
+    public function singlePageLoadTime($pageContent){ 
+
+        // Create a new DOM Document to hold page structure
+        $doc = new DOMDocument();
+
+        // Grab the current time
+        $start_time = microtime(TRUE); 
+
+        // Specify the html content
+        $myhtml = <<<EOF
+        $pageContent
+EOF;
+
+        // load the html
+        $doc->loadHTML($myhtml);
+
+        // Calculate the end time
+        $end_time = microtime(TRUE);
+
+        // Calculate the time taken
+        $time_taken =($end_time - $start_time)*1000;
+        $time_taken = round($time_taken,5);
+
+        // Round it to 2 decimals
+        return round($time_taken, 2);
+    }
+
+    // Calculate all pages average load time
+    // UNUSED, BUT KEPT HERE FOR REFERENCE
+    /* 
     public function averagePageLoadTime(){ 
 
         // Set urls to scan
@@ -317,7 +356,7 @@ EOF;
         $average = array_sum($a)/count($a);
 
         return round($average, 2);
-    }
+    } */
 
 
     // Get unique images on a page
@@ -348,5 +387,7 @@ EOF;
         $uniq = count(array_unique($array));
         return $uniq;
     }
+
+
 }
 
