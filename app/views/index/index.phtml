@@ -1,11 +1,7 @@
-<div class="page-header">
-    <h1>PHP website crawler using Phalcon Framework</h1>
-    <p>By <b>Neil McWilliam</b></p>
-</div>
-
-<hr>
-
 <?php 
+// View for Page Crawler index
+// Revised so that there is no autoload (due to slowness of crawling)
+
 // Share with IndexController
 $pageTitle = new IndexController; 
 $responseCode = new IndexController; 
@@ -33,286 +29,327 @@ $pageContent2 = $fileGetContents->fileGetContents($pageUrl2);
 $pageContent3 = $fileGetContents->fileGetContents($pageUrl3); 
 $pageContent4 = $fileGetContents->fileGetContents($pageUrl4); 
 $pageContent5 = $fileGetContents->fileGetContents($pageUrl5); 
-
-// Store title lengths
-$titleLength1 = strlen($pageTitle->getTitle($pageUrl1));
-$titleLength2 = strlen($pageTitle->getTitle($pageUrl2));
-$titleLength3 = strlen($pageTitle->getTitle($pageUrl3));
-$titleLength4 = strlen($pageTitle->getTitle($pageUrl4));
-$titleLength5 = strlen($pageTitle->getTitle($pageUrl5));
-
-// Calculate average title length
-$averageLength = ($titleLength1 + $titleLength2 + $titleLength3 + $titleLength4 + $titleLength5) / 5;
 ?>
 
-<h2>Number of pages crawled</h2>
-<p><?php echo $totalUrls; ?></p>
+<div class="page-header">
+    <h1>PHP website crawler using Phalcon Framework</h1>
+    <p>By <b>Neil McWilliam</b></p>
+</div>
 
-<h2>Number of unique images</h2>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-    <tr>
-        <th>Page Title</th>
-        <th>URL Analyzed</th>
-        <th># of unique images</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
-            <td><?php echo $pageUrl1; ?></td>
-            <td><?php echo $uniqueImages->countUniqueImages($pageContent1); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
-            <td><?php echo $pageUrl2; ?></td>
-            <td><?php echo $uniqueImages->countUniqueImages($pageContent2); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
-            <td><?php echo $pageUrl3; ?></td>
-            <td><?php echo $uniqueImages->countUniqueImages($pageContent3); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
-            <td><?php echo $pageUrl4; ?></td>
-            <td><?php echo $uniqueImages->countUniqueImages($pageContent4); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
-            <td><?php echo $pageUrl5; ?></td>
-            <td><?php echo $uniqueImages->countUniqueImages($pageContent5); ?></td>
-        </tr>
-    </tbody>
-</table>
+<hr>
 
-<br>
+<p>These are the URL's that we're going to crawl and grab some data from:</p>
+<ul>
+    <li>URL #1: <a href="<?php echo $pageUrl1; ?>" target="_blank"><?php echo $pageUrl1; ?></a></li>
+    <li>URL #2: <a href="<?php echo $pageUrl2; ?>" target="_blank"><?php echo $pageUrl2; ?></a></li>
+    <li>URL #3: <a href="<?php echo $pageUrl3; ?>" target="_blank"><?php echo $pageUrl3; ?></a></li>
+    <li>URL #4: <a href="<?php echo $pageUrl4; ?>" target="_blank"><?php echo $pageUrl4; ?></a></li>
+    <li>URL #5: <a href="<?php echo $pageUrl5; ?>" target="_blank"><?php echo $pageUrl5; ?></a></li>
+</ul>
 
-<h2>Number of unique internal links</h2>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-    <tr>
-        <th>Page Title</th>
-        <th>URL Analyzed</th>
-        <th># of unique internal links</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
-            <td><?php echo $pageUrl1; ?></td>
-            <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent1); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
-            <td><?php echo $pageUrl2; ?></td>
-            <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent2); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
-            <td><?php echo $pageUrl3; ?></td>
-            <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent3); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
-            <td><?php echo $pageUrl4; ?></td>
-            <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent4); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
-            <td><?php echo $pageUrl5; ?></td>
-            <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent5); ?></td>
-        </tr>
-    </tbody>
-</table>
+<hr>
 
-<br>
+<?php 
+// If the session variable exists, then show the content, otherwise do not
+if ($_POST['loadCrawler']==1){
+?>
+    <h2>Number of pages crawled</h2>
+    <p><?php echo $totalUrls; ?></p>
 
-<h2>Number of unique external links</h2>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-    <tr>
-        <th>Page Title</th>
-        <th>URL Analyzed</th>
-        <th># of unique external links</th>
-    </tr>
-    </thead>
-    <tbody>
+    <h2>Number of unique images</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
         <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
-            <td><?php echo $pageUrl1; ?></td>
-            <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent1); ?></td>
+            <th>Page Title</th>
+            <th>URL Analyzed</th>
+            <th># of unique images</th>
         </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
-            <td><?php echo $pageUrl2; ?></td>
-            <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent2); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
-            <td><?php echo $pageUrl3; ?></td>
-            <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent3); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
-            <td><?php echo $pageUrl4; ?></td>
-            <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent4); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
-            <td><?php echo $pageUrl5; ?></td>
-            <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent5); ?></td>
-        </tr>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+                <td><?php echo $pageUrl1; ?></td>
+                <td><?php echo $uniqueImages->countUniqueImages($pageContent1); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+                <td><?php echo $pageUrl2; ?></td>
+                <td><?php echo $uniqueImages->countUniqueImages($pageContent2); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+                <td><?php echo $pageUrl3; ?></td>
+                <td><?php echo $uniqueImages->countUniqueImages($pageContent3); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+                <td><?php echo $pageUrl4; ?></td>
+                <td><?php echo $uniqueImages->countUniqueImages($pageContent4); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+                <td><?php echo $pageUrl5; ?></td>
+                <td><?php echo $uniqueImages->countUniqueImages($pageContent5); ?></td>
+            </tr>
+        </tbody>
+    </table>
 
-<br>
+    <br>
 
-<h2>Average page load</h2>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-    <tr>
-        <th>Page Title</th>
-        <th>URL Analyzed</th>
-        <th>Load time</th>
-    </tr>
-    </thead>
-    <tbody>
+    <h2>Number of unique internal links</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
         <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
-            <td><?php echo $pageUrl1; ?></td>
-            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent1); ?> seconds</td>
+            <th>Page Title</th>
+            <th>URL Analyzed</th>
+            <th># of unique internal links</th>
         </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
-            <td><?php echo $pageUrl2; ?></td>
-            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent2); ?> seconds</td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
-            <td><?php echo $pageUrl3; ?></td>
-            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent3); ?> seconds</td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
-            <td><?php echo $pageUrl4; ?></td>
-            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent4); ?> seconds</td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
-            <td><?php echo $pageUrl5; ?></td>
-            <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent5); ?> seconds</td>
-        </tr>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td>
-                <?php 
-                // Calculate the average 
-                $pageLoadAvg = array($singlePageLoadTime->singlePageLoadTime($pageContent1), $singlePageLoadTime->singlePageLoadTime($pageContent2), $singlePageLoadTime->singlePageLoadTime($pageContent3), $singlePageLoadTime->singlePageLoadTime($pageContent4), $singlePageLoadTime->singlePageLoadTime($pageContent5)); 
-                $pg = array_filter($pageLoadAvg);
-                $averagePgLoad = array_sum($pg)/count($pg);
-                echo "The average page load value is <b>".$averagePgLoad." seconds</b>.";
-                ?>
-            </td>
-        </tr>
-    </tfoot>
-</table>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+                <td><?php echo $pageUrl1; ?></td>
+                <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent1); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+                <td><?php echo $pageUrl2; ?></td>
+                <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent2); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+                <td><?php echo $pageUrl3; ?></td>
+                <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent3); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+                <td><?php echo $pageUrl4; ?></td>
+                <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent4); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+                <td><?php echo $pageUrl5; ?></td>
+                <td><?php echo $internalLinks->countUniqueInternalLinks($pageContent5); ?></td>
+            </tr>
+        </tbody>
+    </table>
 
-<br>
+    <br>
 
-<h2>Word counts</h2>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-    <tr>
-        <th>Page Title</th>
-        <th>URL Analyzed</th>
-        <th># of words</th>
-    </tr>
-    </thead>
-    <tbody>
+    <h2>Number of unique external links</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
         <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
-            <td><?php echo $pageUrl1; ?></td>
-            <td><?php echo $wordCount->getWordCount($pageContent1); ?></td>
+            <th>Page Title</th>
+            <th>URL Analyzed</th>
+            <th># of unique external links</th>
         </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
-            <td><?php echo $pageUrl2; ?></td>
-            <td><?php echo $wordCount->getWordCount($pageContent2); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
-            <td><?php echo $pageUrl3; ?></td>
-            <td><?php echo $wordCount->getWordCount($pageContent3); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
-            <td><?php echo $pageUrl4; ?></td>
-            <td><?php echo $wordCount->getWordCount($pageContent4); ?></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
-            <td><?php echo $pageUrl5; ?></td>
-            <td><?php echo $wordCount->getWordCount($pageContent5); ?></td>
-        </tr>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td>
-                <?php 
-                // Calculate the average 
-                $wordCountAvg = array($wordCount->getWordCount($pageContent1), $wordCount->getWordCount($pageContent2), $wordCount->getWordCount($pageContent3), $wordCount->getWordCount($pageContent4), $wordCount->getWordCount($pageContent5)); 
-                $ab = array_filter($wordCountAvg);
-                $averagePerPg = array_sum($ab)/count($ab);
-                echo "The average number of words per page is <b>".$averagePerPg."</b>.";
-                ?>
-            </td>
-        </tr>
-    </tfoot>
-</table>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+                <td><?php echo $pageUrl1; ?></td>
+                <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent1); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+                <td><?php echo $pageUrl2; ?></td>
+                <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent2); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+                <td><?php echo $pageUrl3; ?></td>
+                <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent3); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+                <td><?php echo $pageUrl4; ?></td>
+                <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent4); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+                <td><?php echo $pageUrl5; ?></td>
+                <td><?php echo $externalLinks->countUniqueExternalLinks($pageContent5); ?></td>
+            </tr>
+        </tbody>
+    </table>
 
-<br>
+    <br>
 
-<h2>Average title length</h2>
-<p><b><?php echo $averageLength; ?></b> characters (including spaces)</p>
+    <h2>Average page load</h2>
+    <p><i>Note that PHP DOMDocument is not the best tool to do this, so the load times are a tad high.</i></p>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+        <tr>
+            <th>Page Title</th>
+            <th>URL Analyzed</th>
+            <th>Load time</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+                <td><?php echo $pageUrl1; ?></td>
+                <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent1); ?> seconds</td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+                <td><?php echo $pageUrl2; ?></td>
+                <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent2); ?> seconds</td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+                <td><?php echo $pageUrl3; ?></td>
+                <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent3); ?> seconds</td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+                <td><?php echo $pageUrl4; ?></td>
+                <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent4); ?> seconds</td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+                <td><?php echo $pageUrl5; ?></td>
+                <td><?php echo $singlePageLoadTime->singlePageLoadTime($pageContent5); ?> seconds</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>
+                    <?php 
+                    // Calculate the average 
+                    $pageLoadAvg = array($singlePageLoadTime->singlePageLoadTime($pageContent1), $singlePageLoadTime->singlePageLoadTime($pageContent2), $singlePageLoadTime->singlePageLoadTime($pageContent3), $singlePageLoadTime->singlePageLoadTime($pageContent4), $singlePageLoadTime->singlePageLoadTime($pageContent5)); 
+                    $pg = array_filter($pageLoadAvg);
+                    $averagePgLoad = array_sum($pg)/count($pg);
+                    echo "The average page load value is <b>".$averagePgLoad." seconds</b>.";
+                    ?>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
 
-<br>
+    <br>
 
-<h2>Page crawled status codes</h2>
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-    <tr>
-        <th>Page Title</th>
-        <th>URL Analyzed</th>
-        <th>HTTP Response Code</th>
-    </tr>
-    </thead>
-    <tbody>
+    <h2>Word counts</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
         <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
-            <td><?php echo $pageUrl1; ?></td>
-            <td><b><?php echo $responseCode->getResponseCode($pageUrl1); ?></b></td>
+            <th>Page Title</th>
+            <th>URL Analyzed</th>
+            <th># of words</th>
         </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+                <td><?php echo $pageUrl1; ?></td>
+                <td><?php echo $wordCount->getWordCount($pageContent1); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+                <td><?php echo $pageUrl2; ?></td>
+                <td><?php echo $wordCount->getWordCount($pageContent2); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+                <td><?php echo $pageUrl3; ?></td>
+                <td><?php echo $wordCount->getWordCount($pageContent3); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+                <td><?php echo $pageUrl4; ?></td>
+                <td><?php echo $wordCount->getWordCount($pageContent4); ?></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+                <td><?php echo $pageUrl5; ?></td>
+                <td><?php echo $wordCount->getWordCount($pageContent5); ?></td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>
+                    <?php 
+                    // Calculate the average 
+                    $wordCountAvg = array($wordCount->getWordCount($pageContent1), $wordCount->getWordCount($pageContent2), $wordCount->getWordCount($pageContent3), $wordCount->getWordCount($pageContent4), $wordCount->getWordCount($pageContent5)); 
+                    $ab = array_filter($wordCountAvg);
+                    $averagePerPg = array_sum($ab)/count($ab);
+                    echo "The average number of words per page is <b>".$averagePerPg."</b>.";
+                    ?>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <br>
+
+    <h2>Average title length</h2>
+    <?php 
+    // Store title lengths
+    $titleLength1 = strlen($pageTitle->getTitle($pageUrl1));
+    $titleLength2 = strlen($pageTitle->getTitle($pageUrl2));
+    $titleLength3 = strlen($pageTitle->getTitle($pageUrl3));
+    $titleLength4 = strlen($pageTitle->getTitle($pageUrl4));
+    $titleLength5 = strlen($pageTitle->getTitle($pageUrl5));
+
+    // Calculate average title length
+    $averageLength = ($titleLength1 + $titleLength2 + $titleLength3 + $titleLength4 + $titleLength5) / 5;
+    ?>
+    <p><b><?php echo $averageLength; ?></b> characters (including spaces)</p>
+
+    <br>
+
+    <h2>Page crawled status codes</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
         <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
-            <td><?php echo $pageUrl2; ?></td>
-            <td><b><?php echo $responseCode->getResponseCode($pageUrl2); ?></b></td>
+            <th>Page Title</th>
+            <th>URL Analyzed</th>
+            <th>HTTP Response Code</th>
         </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
-            <td><?php echo $pageUrl3; ?></td>
-            <td><b><?php echo $responseCode->getResponseCode($pageUrl3); ?></b></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
-            <td><?php echo $pageUrl4; ?></td>
-            <td><b><?php echo $responseCode->getResponseCode($pageUrl4); ?></b></td>
-        </tr>
-        <tr>
-            <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
-            <td><?php echo $pageUrl5; ?></td>
-            <td><b><?php echo $responseCode->getResponseCode($pageUrl5); ?></b></td>
-        </tr>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl1); ?></td>
+                <td><?php echo $pageUrl1; ?></td>
+                <td><b><?php echo $responseCode->getResponseCode($pageUrl1); ?></b></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl2); ?></td>
+                <td><?php echo $pageUrl2; ?></td>
+                <td><b><?php echo $responseCode->getResponseCode($pageUrl2); ?></b></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl3); ?></td>
+                <td><?php echo $pageUrl3; ?></td>
+                <td><b><?php echo $responseCode->getResponseCode($pageUrl3); ?></b></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl4); ?></td>
+                <td><?php echo $pageUrl4; ?></td>
+                <td><b><?php echo $responseCode->getResponseCode($pageUrl4); ?></b></td>
+            </tr>
+            <tr>
+                <td><?php echo $pageTitle->getTitle($pageUrl5); ?></td>
+                <td><?php echo $pageUrl5; ?></td>
+                <td><b><?php echo $responseCode->getResponseCode($pageUrl5); ?></b></td>
+            </tr>
+        </tbody>
+    </table>
+
+<?php 
+// If the session variable does not exist, then just display a message 
+} else {
+?>
+    
+    <p>Note that it will take a few minutes to crawl the pages. 
+    <form method='post'>
+        <p>
+            <input type="hidden" name='loadCrawler' id='loadCrawler' value='1' />
+            <input type='submit' class='btn btn-primary' value='Crawl Pages' />
+        </p>
+    </form>
+
+<?php 
+}
+?>
